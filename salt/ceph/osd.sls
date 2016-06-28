@@ -6,25 +6,13 @@ include:
   - .ceph
 
 {{ conf.bootstrap_osd_keyring }}:
-  cmd.run:
-    - name: echo "Getting bootstrap OSD keyring"
-    - unless: test -f {{ conf.bootstrap_osd_keyring }}
+  file.managed:
+    - name: {{ conf.admin_keyring }}
+    - source: salt://{{ pillar.ceph.config_leader }}{{ conf.admin_keyring }}
 
-{% for mon in salt['mine.get']('roles:ceph-mon','grains.items','grain') -%}
-
-cp.get_file {{ mon }}{{ conf.bootstrap_osd_keyring }}:
-  module.wait:
-    - name: cp.get_file
-    - path: salt://{{ mon }}/files{{ conf.bootstrap_osd_keyring }}
-    - dest: {{ conf.bootstrap_osd_keyring }}
-    - watch:
-      - cmd: {{ conf.bootstrap_osd_keyring }}
-
-{% endfor -%}
-
-{% for dev in salt['pillar.get']('nodes:' + conf.host + ':devs') -%}
+{% for dev in salt['pillar.get']('ceph:nodes:' + conf.host + ':devs') -%}
 {% if dev -%}
-{% set journal = salt['pillar.get']('nodes:' + conf.host + ':devs:' + dev + ':journal') -%}
+{% set journal = salt['pillar.get']('ceph:nodes:' + conf.host + ':devs:' + dev + ':journal') -%}
 
 disk_prepare {{ dev }}:
   cmd.run:
@@ -33,6 +21,8 @@ disk_prepare {{ dev }}:
                           --cluster-uuid {{ conf.fsid }} \
                           --fs-type xfs /dev/{{ dev }} /dev/{{ journal }}
     - unless: parted --script /dev/{{ dev }} print | grep 'ceph data'
+    - require:
+      - file: {{ conf.bootstrap_osd_keyring }}
 
 disk_activate {{ dev }}1:
   cmd.run:
@@ -44,6 +34,12 @@ disk_activate {{ dev }}1:
 {% endif -%}
 {% endfor -%}
 
-start ceph-osd-all:
+start-ceph-osd-all:
   cmd.run:
+    {% if grains.os == "CentOS" %}
+    - name: start ceph-osd-all
     - onlyif: initctl list | grep "ceph-osd-all stop/waiting"
+    {% else %}
+    - name: start ceph-osd-all
+    - onlyif: initctl list | grep "ceph-osd-all stop/waiting"
+    {% endif %}

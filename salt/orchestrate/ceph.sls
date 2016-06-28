@@ -1,5 +1,11 @@
 # vi: set ft=yaml.jinja :
 
+key_setup:
+  salt.state:
+    - tgt: 'roles:ceph-mon'
+    - tgt_type: grain
+    - sls: ceph.keyring
+
 mon_setup:
   salt.state:
     - tgt: 'roles:ceph-mon'

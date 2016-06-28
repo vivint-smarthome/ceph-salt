@@ -3,7 +3,9 @@
 {% set cluster = salt['pillar.get']('ceph:cluster_name') -%}
 {% set conf_file = '/etc/ceph/' + cluster + '.conf' -%}
 {% set admin_keyring = '/etc/ceph/' + cluster + '.client.admin.keyring' -%}
+{% set mon_keyring = '/etc/ceph/' + cluster + '.mon.keyring' -%}
 {% set bootstrap_osd_keyring = '/var/lib/ceph/bootstrap-osd/' + cluster + '.keyring' -%}
-{% set host = salt['config.get']('host') -%}
+{% set host_grain = salt['pillar.get']('ceph:host_grain', 'host') -%}
+{% set host = salt['config.get'](host_grain) -%}
 {% set mon_interface = salt['pillar.get']('ceph:mon:interface') -%}
 {% set fsid = salt['pillar.get']('ceph:global:fsid') -%}

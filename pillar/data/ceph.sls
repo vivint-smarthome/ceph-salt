@@ -33,3 +33,5 @@ ceph:
     pool_default_size: 3
   mon:
     interface: eth1
+    target: "roles:ceph-mon"
+    expr_form: "grain"
