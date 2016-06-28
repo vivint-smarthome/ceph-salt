@@ -1,6 +1,6 @@
 # vi: set ft=yaml.jinja :
 
-{% import 'ceph/global_vars.jinja' as conf with context -%}
+{% import tpldir + '/global_vars.jinja' as conf with context -%}
 {% set ip = salt['network.ip_addrs'](conf.mon_interface)[0] -%}
 {% set secret = '/var/lib/ceph/tmp/' + conf.cluster + '.mon.keyring' -%}
 {% set monmap = '/var/lib/ceph/tmp/' + conf.cluster + 'monmap' -%}

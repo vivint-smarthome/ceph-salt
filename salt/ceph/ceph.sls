@@ -1,7 +1,6 @@
 # vi: set ft=yaml.jinja :
 
-{% import 'ceph/global_vars.jinja' as conf with context -%}
-{% set psls = sls.split('.')[0] -%}
+{% import tpldir + '/global_vars.jinja' as conf with context -%}
 
 include:
   - .repo
@@ -14,10 +13,13 @@ ceph:
 {{ conf.conf_file }}:
   file.managed:
     - template: jinja
-    - source: salt://{{ psls }}/etc/ceph/ceph.conf
+    - source: salt://{{ tpldir }}/etc/ceph/ceph.conf
+    - context:
+        cephdir: {{tpldir | json}}
     - user: root
     - group: root
     - mode: '0644'
+    - makedirs: True
     - require:
       - pkg: ceph
 

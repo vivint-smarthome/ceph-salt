@@ -1,6 +1,6 @@
 # vi: set ft=yaml.jinja :
 
-{% import 'ceph/global_vars.jinja' as conf with context -%}
+{% import tpldir + '/global_vars.jinja' as conf with context -%}
 
 include:
   - .ceph
