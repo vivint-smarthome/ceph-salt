@@ -1,5 +1,5 @@
 ceph:
-  version: firefly
+  version: infernalis
   cluster_name: ceph
   global:
     cluster_network: 192.168.36.0/24

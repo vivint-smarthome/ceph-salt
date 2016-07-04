@@ -37,8 +37,16 @@ disk_activate {{ dev }}1:
 start-ceph-osd-all:
   cmd.run:
     {% if grains.os == "CentOS" %}
-    - name: start ceph-osd-all
-    - onlyif: initctl list | grep "ceph-osd-all stop/waiting"
+    - name: |
+        for ID in $(cat /var/lib/ceph/osd/ceph-*/whoami); do
+          systemctl start ceph-osd@$ID
+          systemctl enable ceph-osd@$ID
+        done
+    - unless: |
+        for ID in $(cat /var/lib/ceph/osd/ceph-*/whoami); do
+          systemctl status ceph-osd@$ID && systemctl is-enabled ceph-osd@$ID || exit 1
+        done
+        exit 0
     {% else %}
     - name: start ceph-osd-all
     - onlyif: initctl list | grep "ceph-osd-all stop/waiting"

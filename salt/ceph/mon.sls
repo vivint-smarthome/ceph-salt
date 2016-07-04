@@ -29,6 +29,7 @@ import_keyring:
         ceph-authtool --cluster {{ conf.cluster }} {{ secret }} \
                       --import-keyring {{ conf.admin_keyring }}
     - unless: ceph-authtool {{ secret }} --list | grep '^\[client.admin\]'
+    - user: ceph
     - watch:
       - file: {{conf.admin_keyring}}
       - file: {{conf.mon_keyring}}
@@ -46,9 +47,18 @@ gen_mon_map:
                    {%- endfor %}
                    --fsid {{ conf.fsid }} {{ monmap }}
     - unless: test -f {{ monmap }}
+    - user: ceph
     - require:
+      - file: /var/lib/ceph/tmp
       - file: {{ conf.conf_file }}
 
+/var/lib/ceph/tmp:
+  file.directory:
+    - user: ceph
+    - group: ceph
+    - mode: 775
+    - require:
+      - pkg: ceph
 
 populate_mon:
   cmd.run:
@@ -58,30 +68,37 @@ populate_mon:
                  --monmap {{ monmap }} \
                  --keyring {{ secret }}
     - unless: test -f /var/lib/ceph/mon/{{ conf.cluster }}-{{ conf.host }}
+    - user: ceph
     - require:
       - file: {{ conf.conf_file }}
+      - file: /var/lib/ceph/tmp
       - cmd: gen_mon_map
       - cmd: import_keyring
 
+{% if grains.os == "CentOS" %}
+start_mon:
+  service.running:
+    - name: ceph-mon@{{conf.host}}
+    - enable: True
+    - require:
+      - cmd: populate_mon
+  cmd.wait:
+    - name: echo started
+    - watch:
+      - service: start_mon
+{% else %}
 start_mon:
   cmd.run:
-    {% if grains.os == "CentOS" %}
-    - name: /etc/init.d/ceph start mon.{{ conf.host }}
-    - unless: /etc/init.d/ceph status mon.{{ conf.host }}
-    {% else %}
     - name: start ceph-mon id={{ conf.host }} cluster={{ conf.cluster }}
     - unless: status ceph-mon id={{ conf.host }} cluster={{ conf.cluster }}
-    {% endif %}
     - require:
       - cmd: populate_mon
       - file: start_mon
   file.managed:
-    {% if grains.os == "CentOS" %}
-    - name: /var/lib/ceph/mon/{{ conf.cluster }}-{{ conf.host }}/sysvinit
-    {% else %}
     - name: /var/lib/ceph/mon/{{ conf.cluster }}-{{ conf.host }}/upstart
-    {% endif %}
     - contents: ""
+{% endif %}
+
 
 osd_keyring_wait:
   cmd.wait:
