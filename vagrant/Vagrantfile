@@ -1,8 +1,8 @@
 # vi: set ft=ruby :
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "trusty64"
-  config.vm.box_url = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
+  config.vm.box = "bento-VAGRANTSLASH-centos-7.2"
+  config.vm.box_url = "https://atlas.hashicorp.com/bento/boxes/centos-7.2/versions/2.2.9/providers/virtualbox.box"
 
   config.vm.provider "virtualbox" do |v|
     v.memory = 1024
@@ -47,7 +47,7 @@ Vagrant.configure("2") do |config|
       ["1","2","3"].each do |disk|
         diskname = File.expand_path("~/node01-#{disk}.vdi")
         v.customize ['createhd', '--filename', diskname, '--size', 4096]
-        v.customize ['storageattach', :id, '--storagectl', 'SATAController', '--port', disk, '--device', 0, '--type', 'hdd', '--medium', diskname]
+        v.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', disk, '--device', 0, '--type', 'hdd', '--medium', diskname]
       end
     end
 
@@ -71,7 +71,7 @@ Vagrant.configure("2") do |config|
       ["1","2","3"].each do |disk|
         diskname = File.expand_path("~/node02-#{disk}.vdi")
         v.customize ['createhd', '--filename', diskname, '--size', 4096]
-        v.customize ['storageattach', :id, '--storagectl', 'SATAController', '--port', disk, '--device', 0, '--type', 'hdd', '--medium', diskname]
+        v.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', disk, '--device', 0, '--type', 'hdd', '--medium', diskname]
       end
     end
 
