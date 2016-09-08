@@ -1,5 +1,5 @@
 ceph:
-  version: infernalis
+  version: jewel
   cluster_name: ceph
   global:
     cluster_network: 192.168.36.0/24
