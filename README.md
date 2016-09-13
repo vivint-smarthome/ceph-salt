@@ -48,28 +48,29 @@ Configuration options
 
 Environment description file with examples is located here: ```pillar/environment.sls```. Edit this file to match with your environment:
 ```
-nodes:
-  master:
-    roles:
-      - ceph-mon
-  node01:
-    roles:
-      - ceph-osd
-      - ceph-mon
-    devs:
-      sdc:
-        journal: sdb
-      sdd:
-        journal: sdb
-  node02:
-    roles:
-      - ceph-osd
-      - ceph-mon
-    devs:
-      sdc:
-        journal: sdb
-      sdd:
-        journal: sdb
+ceph:
+  nodes:
+    master:
+      roles:
+        - ceph-mon
+    node01:
+      roles:
+        - ceph-osd
+        - ceph-mon
+      devs:
+        sdc:
+          journal: sdb
+        sdd:
+          journal: sdb
+    node02:
+      roles:
+        - ceph-osd
+        - ceph-mon
+      devs:
+        sdc:
+          journal: sdb
+        sdd:
+          journal: sdb
 ```
 Ceph configuration file will be automatically generated. Edit ```pillar/data/ceph.sls``` if you want to make additional changes:
 ```
