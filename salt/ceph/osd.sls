@@ -5,10 +5,12 @@
 include:
   - .ceph
 
-{{ conf.bootstrap_osd_keyring }}:
+{% for file in [ conf.bootstrap_osd_keyring, conf.admin_keyring ] %}
+{{ file }}:
   file.managed:
-    - name: {{ conf.admin_keyring }}
-    - source: salt://{{ pillar.ceph.config_leader }}{{ conf.admin_keyring }}
+    - name: {{ file }}
+    - source: salt://{{ pillar.ceph.config_leader }}{{ file }}
+{% endfor %}
 
 {% for dev in salt['pillar.get']('ceph:nodes:' + conf.host + ':devs') -%}
 {% if dev -%}
@@ -23,6 +25,7 @@ disk_prepare {{ dev }}:
     - unless: parted --script /dev/{{ dev }} print | grep 'ceph data'
     - require:
       - file: {{ conf.bootstrap_osd_keyring }}
+      - file: {{ conf.admin_keyring }}
 
 disk_activate {{ dev }}1:
   cmd.run:
