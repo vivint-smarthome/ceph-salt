@@ -11,10 +11,18 @@ include:
 {{ conf.admin_keyring }}:
   file.managed:
     - source: salt://{{ pillar.ceph.config_leader }}{{ conf.admin_keyring }}
+    - group: ceph
+    - mode: 640
+    - require:
+      - pkg: ceph
 
 {{ conf.mon_keyring}}:
   file.managed:
     - source: salt://{{ pillar.ceph.config_leader }}{{ conf.mon_keyring }}
+    - group: ceph
+    - mode: 640
+    - require:
+      - pkg: ceph
 
 trigger_secret_gen_if_missing:
   cmd.run:
@@ -43,7 +51,7 @@ gen_mon_map:
         monmaptool --cluster {{ conf.cluster }} \
                    --create \
                    {%- for mon, mon_grains in salt['mine.get'](pillar.ceph.mon.target, 'grains.items', pillar.ceph.mon.expr_form).items() | sort %}
-                   --add {{ mon_grains[conf.host_grain] }} {{ mon_grains[conf.mon_interface]['inet'][0]['address'] }} \
+                   --add {{ mon_grains[conf.host_grain] }} {{ mon_grains['ip4_interfaces'][conf.mon_interface][0] }} \
                    {%- endfor %}
                    --fsid {{ conf.fsid }} {{ monmap }}
     - unless: test -f {{ monmap }}

@@ -2,4 +2,3 @@
 
 base:
   '*':
-    - salt.roles
