@@ -1,6 +1,7 @@
 # vi: set ft=yaml.jinja :
 
-{% import tpldir + '/global_vars.jinja' as conf with context -%}
+{% set mydir = "./ceph" %} # work around nasty regression!!!
+{% import mydir + '/global_vars.jinja' as conf with context -%}
 
 include:
   - .repo
@@ -13,9 +14,9 @@ ceph:
 {{ conf.conf_file }}:
   file.managed:
     - template: jinja
-    - source: salt://{{ tpldir }}/etc/ceph/ceph.conf
+    - source: salt://{{ mydir }}/etc/ceph/ceph.conf
     - context:
-        cephdir: {{tpldir | json}}
+        cephdir: {{mydir | json}}
     - user: root
     - group: root
     - mode: '0644'
